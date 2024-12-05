@@ -115,24 +115,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The workshop will first introduce the main spatial data models (vector: points/lines/polygons; raster: various grid types), their implementation in file formats and software libraries to read and write them. It will then introduce time series associated with such models (NetCDF, Zarr, CDL, CF conventions) and discuss APIs for retrieving satellite, weather and climate data.</p>
 <section id="vector-data" class="level3">
 <h3 class="anchored" data-anchor-id="vector-data">Vector data</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr) <span class="sc">|&gt;</span> <span class="fu">suppressPackageStartupMessages</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">read_sf</span>(<span class="st">"https://github.com/r-spatial/sf/raw/main/inst/gpkg/nc.gpkg"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(BIR74) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(<span class="at">border =</span> <span class="st">'grey'</span>, <span class="at">pal =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">11</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="stairs_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="raster-data" class="level3">
 <h3 class="anchored" data-anchor-id="raster-data">Raster data</h3>
 </section>
 <section id="time-series" class="level3">
 <h3 class="anchored" data-anchor-id="time-series">Time series</h3>
+<p>Typical data structure: table (e.g., a .csv) with a Date or DateTime column.</p>
+<ul>
+<li>Does time refer to a time instance, or to a time period?</li>
+<li>Is the time period clear, and/or explicit (start- and end-time)?</li>
+<li>Are time stamps of a time “type”, or in case of text, do time stamps follow a known schema such as <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO8601</a>?</li>
+</ul>
 </section>
 <section id="data-cubes" class="level3">
 <h3 class="anchored" data-anchor-id="data-cubes">Data cubes</h3>
 </section>
 <section id="cloud-optimized-geospatial-apis" class="level3">
 <h3 class="anchored" data-anchor-id="cloud-optimized-geospatial-apis">Cloud-optimized geospatial, APIs</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE</code></pre>
-</div>
-</div>
 </section>
 </section>
 
