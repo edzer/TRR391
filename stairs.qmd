@@ -2,6 +2,13 @@
 title: "File formats and APIs for spatial and spatiotemporal data"
 author: "Edzer Pebesma"
 date: "Jan 30, 2025"
+output:
+  html_document:
+    toc: true
+#    toc_float:
+#      collapsed: false
+#      smooth_scroll: false
+#    toc_depth: 2
 ---
 
 ## Content
@@ -11,6 +18,7 @@ The workshop will first introduce the main spatial data models (vector: points/l
 ### Vector data
 
 ```{r}
+#| code-fold: true
 library(sf)
 library(dplyr) |> suppressPackageStartupMessages()
 read_sf("https://github.com/r-spatial/sf/raw/main/inst/gpkg/nc.gpkg") |> 
