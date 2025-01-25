@@ -1,41 +1,379 @@
 ---
-title: "File formats and APIs for spatial and spatiotemporal data"
+title: "File Formats and APIs for Spatial and Spatiotemporal data"
 author: "Edzer Pebesma"
 date: "Jan 30, 2025"
 output:
   html_document:
     toc: true
-#    toc_float:
-#      collapsed: false
-#      smooth_scroll: false
-#    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 2
 ---
 
 ## Content
 
-The workshop will first introduce the main spatial data models (vector: points/lines/polygons; raster: various grid types), their implementation in file formats and software libraries to read and write them. It will then introduce time series associated with such models (NetCDF, Zarr, CDL, CF conventions) and discuss APIs for retrieving satellite, weather and climate data.
+The workshop will first introduce the main spatial data models
+(vector: points/lines/polygons; raster: various grid types), their
+implementation in file formats and software libraries to read and
+write them. It will then introduce time series associated with
+such models (NetCDF, Zarr, CDL, CF conventions) and discuss APIs
+for retrieving satellite, weather and climate data.
+
+## What can we do in 2 hrs?
+
+* this will be mostly a lecture, confronting you with ideas and content
+* hands-on experience
+* where to go with questions? Friends, colleagues, supervisors, GitHub, StackOverflow, ...
+* a possible resource (with exercises, answers online): [Spatial Data Science](https://r-spatial.org/book/)
+
+### R-markdown
+
+This html document was generated with 
+```
+quarto render stairs.qmd
+```
+with sources on [GitHub](https://github.com/edzer/TRR391/). Feel
+free to 
+
+* pose questions there, as issues, or
+* submit suggestions for improvements as pull requests
+
+## Tables
+
+#### Time-wide
+
+```{r}
+library(foreign)
+library(sf)
+read.dbf(system.file("shape/nc.dbf", package="sf"))[1:5,c(5,9:14)]
+```
+In this file (Bivand 2024), we see that the variables `BIR` (number of births),
+`SID` (number of sudden-infant-death cases) and `NWBIR` (number of
+non-white births) are availabe for two times:
+* `74` for July 1, 1974 to June 30, 1978 and 
+* `79`, for July 1, 1979 to June 30, 1984
+
+Here, we see that 
+
+* variable name and "time" is combined in a single string
+* the time period cannot be reconstructed or derived from this string
+
+In general, using time as column names is problematic, as
+
+* time strings starts typically with a number, column numbers are often not allowed to start with a number
+* time strings are ambiguous without key: does `01/03/11' refer to the first of March, or the third of January,
+  or something else? Which century?
+
+#### Space-wide
+The Irish wind data (Haslett and Raftery 1989) available from package `gstat`, for which the first six
+records and 9 of the stations (abbreviated by `RPT`, `VAL` etc) are
+```{r}
+library(gstat)
+data("wind", package = "gstat")
+wind[1:6,1:12]
+```
+are in space-wide format: each _column_ refers to another wind
+measurement _location_, and the rows reflect a single time period;
+wind was reported as daily average wind speed in knots (1 knot =
+0.5418 m/s). Year 61 refers to 1961, time is spread over three
+columns. Station locations are listed in another table:
+
+```{r}
+wind.loc
+```
+Here, locations are expressed in [sexagesimal
+units](https://en.wikipedia.org/wiki/Sexagesimal), in
+degree-minute-second (DMS) notation, as opposed to (in data science
+more usual) decimal degree (DD) notation. Note that both are
+_degrees_. 
+
+Degree units are directly suitable for Euclidean/Cartesian
+computations when distances are required: depending on the distance
+to the equator, one degree longitude is smaller than one degree
+latitude (roughly 111 km).
+
+### Long format, tidy data
+
+In the `Produc` data set, a panel of 48 observations
+from 1970 to 1986 available from package `plm` 
+the first five records and nine columns are shown by
+```{r}
+library(plm)
+data("Produc", package = "plm")
+Produc[1:5,1:9]
+```
+where the first two columns denote space and time (the default
+assumption for package `plm`), and e.g., `pcap` reflects private
+capital stock. Space is denoted by labels (state name), time by
+an integer (year).
+
+## Time in R
+
+R has strong, built-in time support for date 
+```{r}
+(d = as.Date("2024-04-25"))
+as.numeric(d) # days since Jan 1, 1970
+```
+and date-time ([POSIX time](https://en.wikipedia.org/wiki/Unix_time)):
+```{r}
+dt = as.POSIXct("2024-04-25 20:35")
+as.numeric(dt) # seconds since 1970-01-01
+print(dt, tz="UTC") # converts to time zones
+st = Sys.time() # current time
+as.numeric(st) # floating point: has milli/micro seconds
+```
+and support for time differences:
+```{r}
+st - dt
+```
+
+## Spatial data
+
+### CRS, projection, datums
+
+Spatially quantitative locations use coordinates to define locations.
+Coordinate reference systems define how spatial coordinates are to
+be interpreted, and combined with other spatial data. Coordinate reference
+systems contain:
+
+* a "base geographic coordinate reference system": if these data are converted
+  to geodetic coordinates (lon/lat degrees), how should we then interpret them?
+  This contains the datum: definition of origin and size of the reference ellipsoid.
+* (optionally, in case of projected data) a coordinate conversion: how were
+  these data converted (projected) from the geodetic coordinates.
+
+Transforming a dataset into another _datum_ is called coordinate
+_transformation_.  Projecting (or unprojecting) a dataset, without
+changing datum, is called coordinate _conversion_. (See Iliffe
+and Lott, Datums and Map projections: For Remote Sensing, GIS and
+Surveying, 2nd edition).
+
+```{r}
+st_crs("EPSG:3857")
+```
+
+*** NOW THIS IS IMPORTANT ***
+
+Unprojected, geodetic coordinates are _angles_ and define positions
+on an ellipsoid (or sphere, $S^2$), and should not be used as if
+they are positions in a Cartesian system ($R^2). (This is possibly
+the most commonly made error in spatial data science.)
 
 ### Vector data
+
+In spatial analysis, "vector data" refers to _vector geometries_,
+where coordinates are stored explicitly as pairs (or triples) of
+numbers (vectors). This is opposed to _raster data_, where pixels
+are ordered in a regular system, and for every pixel coordinate
+values are not stored explicitly, but defined jointly.
+
+Vector data is comprised of _points_, _lines_, or _polygons_ ;
+more complex concepts can be built from those (multi-versions;
+networks; coverages/tesselations).
 
 ```{r}
 #| code-fold: true
 library(sf)
 library(dplyr) |> suppressPackageStartupMessages()
-read_sf("https://github.com/r-spatial/sf/raw/main/inst/gpkg/nc.gpkg") |> 
+file = system.file("gpkg/nc.gpkg", package = "sf")
+read_sf(file) |> 
 		select(BIR74) |>
 		plot(border = 'grey', pal = viridis::viridis(11))
 ```
+or alternatively, one can read directly from a URL
+```{eval=FALSE}
+read_sf("https://github.com/r-spatial/sf/raw/main/inst/gpkg/nc.gpkg")
+```
+
+#### Simple features 
+
+"Simple features" comes from _simple feature access_, an OGC [standard](https://www.ogc.org/publications/standard/sfa/).
+OGC stands for "Open Geospatial Consortium" and is a standardisation body; many OGC standards become ISO standards (for whatever it is worth!).
+
+A feature is a "thing" that has 
+
+* a feature geometry (location, shape if not point)
+* other properties, called feature attributes
+
+"Simple" in "simple feature" refers to the property that geometries are points, lines or polygons, and that lines and polygon boundaries consists of sequences of points connected with _straight lines_ (edges), and that edges do not cross other edges (do not self-intersect). Polygons consist of an outer (closed) ring with zero or more inner (closed) rings denoting holes.
+
+Simple feature geometries are zero-dimensional (points), one-dimensional (linestrings), or two-dimensional (polygons). Each geometry has an interior (I), a boundary (B) and an exterior (E). For polygons this is trivial, but 
+
+* points: have an interior but no boundary
+* lines: have a boundary that consists of the end points, all other points are interior
+
+
+### Intro to `sf` and `stars`
+
+-   Briefly: `sf` provides classes and methods for *simple feature access*
+    -   a feature is a "thing", with geometrical properties (point(s), line(s), polygon(s)) and attributes
+    -   `sf` stores data in `data.frame`s with a list-column (of class `sfc`) that holds the geometries
+
+::: {.callout-tip title="the Simple Feature standard"}
+"Simple Feature Access" is an [open standard](https://www.ogc.org/standard/sfa/) for data with vector geometries. It defines a set of classes for geometries and operations on them.
+
+-   "simple" refers to curves that are "simply" represented by points connected by straight lines
+-   connecting lines are not allowed to [self-intersect](https://r-spatial.org/book/03-Geometries.html#sec-valid)
+-   polygons can have holes, and have validity constraints: holes cannot extrude the outer ring etc.
+-   All spatial software uses this: ArcGIS, QGIS, PostGIS, other spatial databases, ...
+:::
+
+#### Why do all functions in `sf` start with `st_`?
+
+-   see [here](https://ecoevo.social/@noamross/112055449473807578)
+
+
+#### `sf` operators, how to understand?
+
+Package `sf` has objects at three nested ["levels"](https://r-spatial.org/book/07-Introsf.html#fig-sfobj):
+
+-   `sfg`: a single geometry (without coordinate reference system); contained in:
+
+-   `sfc`: a set of `sfg` geometries (`list`), with a coordinate reference system and bounding box; contained in:
+
+-   `sf`: a `data.frame` or `tibble` with at least one geometry (`sfc`) column
+
+-   Operations *not* involving geometry (`data.frame`; base R; tidyverse)
+
+    -   geometry column + `sf` class is sticky!
+    -   this can be convenient, and sometimes annoying
+    -   use `as.data.frame` or `as_tibble` to strip the `sf` class label
+
+-   Operations involving *only* geometry
+
+    -   **predicates** (resulting `TRUE`/`FALSE`)
+        -   unary
+        -   binary: [DE9-IM](https://en.wikipedia.org/wiki/DE-9IM); work on two sets, result `sgbp`, which is a sparse logical matrix representation
+            -   is_within_distance
+    -   **measures**
+        -   unary: length, area
+        -   binary: distance, `by_element = FALSE`
+    -   **transformers**
+        -   unary: buffer, centroid
+        -   binary: intersection, union, difference, symdifference
+        -   n-ary: intersection, difference
+
+-   Operations involving geometry *and* attributes
+
+    -   many of the above!
+    -   `st_join`
+    -   `aggregate`
+    -   `st_interpolate_aw`: requires expression whether variable is spatially *extensive* or *intensive*
+
 
 ### Raster data
 
+In addition to vector (point/line/polygon) data, we also have
+_raster data_. For _regular_ rasters, space is cut into square
+cells, aligned with $x$ and $y$.  Raster spaces _can_ tesselate, see
+[here](https://r-spatial.org/book/03-Geometries.html#raster-tessellations).
+
+In addition to regular rasters, we have rotated, sheared, rectilinear
+and curvilinear rasters. The raster _space_ is primarily flat,
+so any time we use it model data of the Earth surface, we violate
+the constant raster cell size concept. Many data are distributed
+as regular rasters in geodetic coordinates (long/lat space, e.g.,
+0.25 degree raster cells), mostly for convienience (of who?)
+
+**Discrete global grids** are (semi-)regular tesselations of the
+Earth surface, using squares, triangles, or hexagons. Examples are:
+
+* Google's [s2geometry](http://s2geometry.io/) (R package [s2](https://cran.r-project.org/web/packages/s2/index.html))
+* Uber's [H3](https://www.uber.com/en-FR/blog/h3/) (R package [h3r](https://cran.r-project.org/web/packages/h3r/index.html))
+* Kevin Sahr's [dggrid](https://discreteglobal.wpengine.com/) (also nested hexagons; R package [dggridr](https://cran.r-project.org/web/packages/dggridR/index.html))
+
+Interestingly, computer screens are raster devices, so any time
+we do view vector data on a computer screen, a rasterization has
+taken place.
+
+#### data cubes
+
+Data cubes are _array data_ with one or more dimensions associated
+with space or geometry. The degenerate example is a one-dimensional
+array (or collection thereof), which we have in a table or
+data.frame.  The canonical example of array data is raster data,
+or a time series thereof. 
+
+Further examples include:
+
+* 3D rasters, including depth/height (atmospheric, geological)
+* time series for points (one dimension with feature geometries)
+* time series for areas (one dimension with feature geometries)
+* Origin-destination (OD) matrices (two dimensions with feature geometries)
+* OD matrices as a function of time
+
+#### CDL
+
+CDL stands for [common data
+language](https://docs.unidata.ucar.edu/nug/2.0-draft/cdl.html) and
+is the human-readable, text-form of the binary NetCDF format. NetCDF
+is the dominant format used for geospatial modelling data, like
+weather reanalysis (ERA5) and climate forecast (CMIP6) data. It
+defines
+
+* dimensions: defines names and integer range (dimension)
+* variables: specifies how arrays depend on dimensions
+* data: the actual values of the arrays
+
+Beyond NetCDF, Zarr is now also used as a cloud-optimized format
+(see below) following CDL conventions.
+
+#### CF conventions
+
+The [CF metadata conventions](http://cfconventions.org/) contain
+conventions for CF (climate and forecast) data, including how
+variables are named and defined, how units are expressed, and also
+how e.g. vector data cubes can be realised with CDL (search for
+"discrete geometries").
+
 ### Time series
 
-Typical data structure: table (e.g., a .csv) with a Date or DateTime column.
+Typical data structure: table (e.g., a .csv, or `data.frame`) with a Date or DateTime column, or
+a matrix (pkg `zoo` and `xts`) with a Date or DateTime or index (attribute).
 
 * Does time refer to a time instance, or to a time period? 
 * Is the time period clear, and/or explicit (start- and end-time)?
-* Are time stamps of a time "type", or in case of text, do time stamps follow a known schema such as [ISO8601](https://en.wikipedia.org/wiki/ISO_8601)?
+* Common assumption: 
+    * left-closed, right-open interval; 
+	* time stamp indicates the start
+    * useful if time step is constant (regular)
+* Are time stamps of a time "type" (`Date`, `POSIXt`), or in case of text, do time stamps follow a known schema such as [ISO8601](https://en.wikipedia.org/wiki/ISO_8601)?
 
-### Data cubes
 
 ### Cloud-optimized geospatial, APIs
+
+Cloud-optimized or cloud-native datasets are 
+
+* For vector data: paruet, geoparquet, arrow
+* For raster data: cloud-optimized GeoTIFF (COG), 
+* Raster data/data cubes: Zarr (typically follows CDL)
+
+#### APIs
+
+APIs are application programming interfaces; essentially, they
+define the way the web works. Without going too much in detail
+how they work, we can point to several api's:
+
+* [STAC](https://stacspec.org/en), the spatiotemporal asset catalog, is a spec for APIs that can tell you where to find datasets, allowing for temporal and special predicates
+* [stacindex](https://stacindex.org/) gives an index to public STACs 
+* [openEO](https://openeo.org/) an API to query and process data cubes (satellite imagery in particular), e.g. run on the [CDSE](https://dataspace.copernicus.eu/); clients are available for R, Python, Julia as well as JavaScript (web-based, graphical)
+* [CDS](https://cds.climate.copernicus.eu/) the climate data store
+allows you to download weather or climate data, potentially after
+processing (e.g. aggregating to weekly/monthly mean or maximum
+values, or selecting a specific time period)
+
+## References
+
+* Roger Bivand, 2024; Introduction to the North Carolina SIDS data set (re-revised); [spdep vignette](https://cran.r-project.org/web/packages/spdep/vignettes/sids.html)
+* Haslett, J. and Raftery, A. E. (1989). Space-time Modelling with
+  Long-memory Dependence: Assessing Ireland's Wind Power Resource
+  (with Discussion). Applied Statistics 38, 1-50.
+* Pebesma, E., 2012. spacetime: Spatio-Temporal Data in
+  R. Journal of Statistical Software, volume 51, issue 7;
+  [1-30](https://www.jstatsoft.org/article/view/v051i07)
+* Pebesma, E.; Bivand, R. (2023). Spatial Data Science: With
+  Applications in R (1st ed.). 314 pages. [Chapman and Hall/CRC,
+  Boca Raton.](https://doi.org/10.1201/9780429459016); available
+  [online](https://r-spatial.org/book/)
+

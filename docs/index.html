@@ -9,7 +9,7 @@
 <meta name="author" content="Edzer Pebesma">
 <meta name="dcterms.date" content="2025-01-30">
 
-<title>File formats and APIs for spatial and spatiotemporal data</title>
+<title>File Formats and APIs for Spatial and Spatiotemporal data</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -70,6 +70,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="stairs_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="stairs_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -81,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">File formats and APIs for spatial and spatiotemporal data</h1>
+<h1 class="title">File Formats and APIs for Spatial and Spatiotemporal data</h1>
 </div>
 
 
@@ -113,50 +142,418 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="content" class="level2">
 <h2 class="anchored" data-anchor-id="content">Content</h2>
 <p>The workshop will first introduce the main spatial data models (vector: points/lines/polygons; raster: various grid types), their implementation in file formats and software libraries to read and write them. It will then introduce time series associated with such models (NetCDF, Zarr, CDL, CF conventions) and discuss APIs for retrieving satellite, weather and climate data.</p>
-<section id="vector-data" class="level3">
-<h3 class="anchored" data-anchor-id="vector-data">Vector data</h3>
+</section>
+<section id="what-can-we-do-in-2-hrs" class="level2">
+<h2 class="anchored" data-anchor-id="what-can-we-do-in-2-hrs">What can we do in 2 hrs?</h2>
+<ul>
+<li>this will be mostly a lecture, confronting you with ideas and content</li>
+<li>hands-on experience</li>
+<li>where to go with questions? Friends, colleagues, supervisors, GitHub, StackOverflow, …</li>
+<li>a possible resource (with exercises, answers online): <a href="https://r-spatial.org/book/">Spatial Data Science</a></li>
+</ul>
+<section id="r-markdown" class="level3">
+<h3 class="anchored" data-anchor-id="r-markdown">R-markdown</h3>
+<p>This html document was generated with</p>
+<pre><code>quarto render stairs.qmd</code></pre>
+<p>with sources on <a href="https://github.com/edzer/TRR391/">GitHub</a>. Feel free to</p>
+<ul>
+<li>pose questions there, as issues, or</li>
+<li>submit suggestions for improvements as pull requests</li>
+</ul>
+</section>
+</section>
+<section id="tables" class="level2">
+<h2 class="anchored" data-anchor-id="tables">Tables</h2>
+<section id="time-wide" class="level4">
+<h4 class="anchored" data-anchor-id="time-wide">Time-wide</h4>
 <div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(foreign)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">read.dbf</span>(<span class="fu">system.file</span>(<span class="st">"shape/nc.dbf"</span>, <span class="at">package=</span><span class="st">"sf"</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">9</span><span class="sc">:</span><span class="dv">14</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         NAME BIR74 SID74 NWBIR74 BIR79 SID79 NWBIR79
+1        Ashe  1091     1      10  1364     0      19
+2   Alleghany   487     0      10   542     3      12
+3       Surry  3188     5     208  3616     6     260
+4   Currituck   508     1     123   830     2     145
+5 Northampton  1421     9    1066  1606     3    1197</code></pre>
+</div>
+</div>
+<p>In this file (Bivand 2024), we see that the variables <code>BIR</code> (number of births), <code>SID</code> (number of sudden-infant-death cases) and <code>NWBIR</code> (number of non-white births) are availabe for two times: * <code>74</code> for July 1, 1974 to June 30, 1978 and * <code>79</code>, for July 1, 1979 to June 30, 1984</p>
+<p>Here, we see that</p>
+<ul>
+<li>variable name and “time” is combined in a single string</li>
+<li>the time period cannot be reconstructed or derived from this string</li>
+</ul>
+<p>In general, using time as column names is problematic, as</p>
+<ul>
+<li>time strings starts typically with a number, column numbers are often not allowed to start with a number</li>
+<li>time strings are ambiguous without key: does `01/03/11’ refer to the first of March, or the third of January, or something else? Which century?</li>
+</ul>
+</section>
+<section id="space-wide" class="level4">
+<h4 class="anchored" data-anchor-id="space-wide">Space-wide</h4>
+<p>The Irish wind data (Haslett and Raftery 1989) available from package <code>gstat</code>, for which the first six records and 9 of the stations (abbreviated by <code>RPT</code>, <code>VAL</code> etc) are</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gstat)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"wind"</span>, <span class="at">package =</span> <span class="st">"gstat"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>wind[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  year month day   RPT   VAL   ROS   KIL   SHA  BIR   DUB   CLA   MUL
+1   61     1   1 15.04 14.96 13.17  9.29 13.96 9.87 13.67 10.25 10.83
+2   61     1   2 14.71 16.88 10.83  6.50 12.62 7.67 11.50 10.04  9.79
+3   61     1   3 18.50 16.88 12.33 10.13 11.17 6.17 11.25  8.04  8.50
+4   61     1   4 10.58  6.63 11.75  4.58  4.54 2.88  8.63  1.79  5.83
+5   61     1   5 13.33 13.25 11.42  6.17 10.71 8.21 11.92  6.54 10.92
+6   61     1   6 13.21  8.12  9.96  6.67  5.37 4.50 10.67  4.42  7.17</code></pre>
+</div>
+</div>
+<p>are in space-wide format: each <em>column</em> refers to another wind measurement <em>location</em>, and the rows reflect a single time period; wind was reported as daily average wind speed in knots (1 knot = 0.5418 m/s). Year 61 refers to 1961, time is spread over three columns. Station locations are listed in another table:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wind.loc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Station Code       Latitude     Longitude MeanWind
+1       Valentia  VAL        51d56'N       10d15'W     5.48
+2      Belmullet  BEL        54d14'N       10d00'W     6.75
+3    Claremorris  CLA        53d43'N        8d59'W     4.32
+4        Shannon  SHA        52d42'N        8d55'W     5.38
+5  Roche's Point  RPT        51d48'N        8d15'W     6.36
+6           Birr  BIR        53d05'N        7d53'W     3.65
+7      Mullingar  MUL        53d32'N        7d22'W     4.38
+8     Malin Head  MAL        55d22'N        7d20'W     8.03
+9       Kilkenny  KIL        52d40'N        7d16'W     3.25
+10        Clones  CLO        54d11'N        7d14'W     4.48
+11        Dublin  DUB        53d26'N        6d15'W     5.05
+12       Roslare  ROS 52d16'56.791"N 6d21'25.056"W     6.00</code></pre>
+</div>
+</div>
+<p>Here, locations are expressed in <a href="https://en.wikipedia.org/wiki/Sexagesimal">sexagesimal units</a>, in degree-minute-second (DMS) notation, as opposed to (in data science more usual) decimal degree (DD) notation. Note that both are <em>degrees</em>.</p>
+<p>Degree units are directly suitable for Euclidean/Cartesian computations when distances are required: depending on the distance to the equator, one degree longitude is smaller than one degree latitude (roughly 111 km).</p>
+</section>
+<section id="long-format-tidy-data" class="level3">
+<h3 class="anchored" data-anchor-id="long-format-tidy-data">Long format, tidy data</h3>
+<p>In the <code>Produc</code> data set, a panel of 48 observations from 1970 to 1986 available from package <code>plm</code> the first five records and nine columns are shown by</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plm)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Produc"</span>, <span class="at">package =</span> <span class="st">"plm"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>Produc[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    state year region     pcap     hwy   water    util       pc   gsp
+1 ALABAMA 1970      6 15032.67 7325.80 1655.68 6051.20 35793.80 28418
+2 ALABAMA 1971      6 15501.94 7525.94 1721.02 6254.98 37299.91 29375
+3 ALABAMA 1972      6 15972.41 7765.42 1764.75 6442.23 38670.30 31303
+4 ALABAMA 1973      6 16406.26 7907.66 1742.41 6756.19 40084.01 33430
+5 ALABAMA 1974      6 16762.67 8025.52 1734.85 7002.29 42057.31 33749</code></pre>
+</div>
+</div>
+<p>where the first two columns denote space and time (the default assumption for package <code>plm</code>), and e.g., <code>pcap</code> reflects private capital stock. Space is denoted by labels (state name), time by an integer (year).</p>
+</section>
+</section>
+<section id="time-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="time-in-r">Time in R</h2>
+<p>R has strong, built-in time support for date</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="at">d =</span> <span class="fu">as.Date</span>(<span class="st">"2024-04-25"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2024-04-25"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(d) <span class="co"># days since Jan 1, 1970</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 19838</code></pre>
+</div>
+</div>
+<p>and date-time (<a href="https://en.wikipedia.org/wiki/Unix_time">POSIX time</a>):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">=</span> <span class="fu">as.POSIXct</span>(<span class="st">"2024-04-25 20:35"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(dt) <span class="co"># seconds since 1970-01-01</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1714070100</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dt, <span class="at">tz=</span><span class="st">"UTC"</span>) <span class="co"># converts to time zones</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2024-04-25 18:35:00 UTC"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>st <span class="ot">=</span> <span class="fu">Sys.time</span>() <span class="co"># current time</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(st) <span class="co"># floating point: has milli/micro seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1737812581</code></pre>
+</div>
+</div>
+<p>and support for time differences:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>st <span class="sc">-</span> dt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Time difference of 274.7972 days</code></pre>
+</div>
+</div>
+</section>
+<section id="spatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-data">Spatial data</h2>
+<section id="crs-projection-datums" class="level3">
+<h3 class="anchored" data-anchor-id="crs-projection-datums">CRS, projection, datums</h3>
+<p>Spatially quantitative locations use coordinates to define locations. Coordinate reference systems define how spatial coordinates are to be interpreted, and combined with other spatial data. Coordinate reference systems contain:</p>
+<ul>
+<li>a “base geographic coordinate reference system”: if these data are converted to geodetic coordinates (lon/lat degrees), how should we then interpret them? This contains the datum: definition of origin and size of the reference ellipsoid.</li>
+<li>(optionally, in case of projected data) a coordinate conversion: how were these data converted (projected) from the geodetic coordinates.</li>
+</ul>
+<p>Transforming a dataset into another <em>datum</em> is called coordinate <em>transformation</em>. Projecting (or unprojecting) a dataset, without changing datum, is called coordinate <em>conversion</em>. (See Iliffe and Lott, Datums and Map projections: For Remote Sensing, GIS and Surveying, 2nd edition).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(<span class="st">"EPSG:3857"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:3857 
+  wkt:
+PROJCRS["WGS 84 / Pseudo-Mercator",
+    BASEGEOGCRS["WGS 84",
+        ENSEMBLE["World Geodetic System 1984 ensemble",
+            MEMBER["World Geodetic System 1984 (Transit)"],
+            MEMBER["World Geodetic System 1984 (G730)"],
+            MEMBER["World Geodetic System 1984 (G873)"],
+            MEMBER["World Geodetic System 1984 (G1150)"],
+            MEMBER["World Geodetic System 1984 (G1674)"],
+            MEMBER["World Geodetic System 1984 (G1762)"],
+            MEMBER["World Geodetic System 1984 (G2139)"],
+            ELLIPSOID["WGS 84",6378137,298.257223563,
+                LENGTHUNIT["metre",1]],
+            ENSEMBLEACCURACY[2.0]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4326]],
+    CONVERSION["Popular Visualisation Pseudo-Mercator",
+        METHOD["Popular Visualisation Pseudo Mercator",
+            ID["EPSG",1024]],
+        PARAMETER["Latitude of natural origin",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["False easting",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["easting (X)",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["northing (Y)",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Web mapping and visualisation."],
+        AREA["World between 85.06°S and 85.06°N."],
+        BBOX[-85.06,-180,85.06,180]],
+    ID["EPSG",3857]]</code></pre>
+</div>
+</div>
+<p>*** NOW THIS IS IMPORTANT ***</p>
+<p>Unprojected, geodetic coordinates are <em>angles</em> and define positions on an ellipsoid (or sphere, <span class="math inline">\(S^2\)</span>), and should not be used as if they are positions in a Cartesian system ($R^2). (This is possibly the most commonly made error in spatial data science.)</p>
+</section>
+<section id="vector-data" class="level3">
+<h3 class="anchored" data-anchor-id="vector-data">Vector data</h3>
+<p>In spatial analysis, “vector data” refers to <em>vector geometries</em>, where coordinates are stored explicitly as pairs (or triples) of numbers (vectors). This is opposed to <em>raster data</em>, where pixels are ordered in a regular system, and for every pixel coordinate values are not stored explicitly, but defined jointly.</p>
+<p>Vector data is comprised of <em>points</em>, <em>lines</em>, or <em>polygons</em> ; more complex concepts can be built from those (multi-versions; networks; coverages/tesselations).</p>
+<div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr) <span class="sc">|&gt;</span> <span class="fu">suppressPackageStartupMessages</span>()</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">read_sf</span>(<span class="st">"https://github.com/r-spatial/sf/raw/main/inst/gpkg/nc.gpkg"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(BIR74) <span class="sc">|&gt;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(<span class="at">border =</span> <span class="st">'grey'</span>, <span class="at">pal =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">11</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr) <span class="sc">|&gt;</span> <span class="fu">suppressPackageStartupMessages</span>()</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>file <span class="ot">=</span> <span class="fu">system.file</span>(<span class="st">"gpkg/nc.gpkg"</span>, <span class="at">package =</span> <span class="st">"sf"</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">read_sf</span>(file) <span class="sc">|&gt;</span> </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(BIR74) <span class="sc">|&gt;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">plot</span>(<span class="at">border =</span> <span class="st">'grey'</span>, <span class="at">pal =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">11</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="stairs_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="stairs_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>or alternatively, one can read directly from a URL</p>
+<pre data-eval="FALSE"><code>read_sf("https://github.com/r-spatial/sf/raw/main/inst/gpkg/nc.gpkg")</code></pre>
+<section id="simple-features" class="level4">
+<h4 class="anchored" data-anchor-id="simple-features">Simple features</h4>
+<p>“Simple features” comes from <em>simple feature access</em>, an OGC <a href="https://www.ogc.org/publications/standard/sfa/">standard</a>. OGC stands for “Open Geospatial Consortium” and is a standardisation body; many OGC standards become ISO standards (for whatever it is worth!).</p>
+<p>A feature is a “thing” that has</p>
+<ul>
+<li>a feature geometry (location, shape if not point)</li>
+<li>other properties, called feature attributes</li>
+</ul>
+<p>“Simple” in “simple feature” refers to the property that geometries are points, lines or polygons, and that lines and polygon boundaries consists of sequences of points connected with <em>straight lines</em> (edges), and that edges do not cross other edges (do not self-intersect). Polygons consist of an outer (closed) ring with zero or more inner (closed) rings denoting holes.</p>
+<p>Simple feature geometries are zero-dimensional (points), one-dimensional (linestrings), or two-dimensional (polygons). Each geometry has an interior (I), a boundary (B) and an exterior (E). For polygons this is trivial, but</p>
+<ul>
+<li>points: have an interior but no boundary</li>
+<li>lines: have a boundary that consists of the end points, all other points are interior</li>
+</ul>
+</section>
+</section>
+<section id="intro-to-sf-and-stars" class="level3">
+<h3 class="anchored" data-anchor-id="intro-to-sf-and-stars">Intro to <code>sf</code> and <code>stars</code></h3>
+<ul>
+<li>Briefly: <code>sf</code> provides classes and methods for <em>simple feature access</em>
+<ul>
+<li>a feature is a “thing”, with geometrical properties (point(s), line(s), polygon(s)) and attributes</li>
+<li><code>sf</code> stores data in <code>data.frame</code>s with a list-column (of class <code>sfc</code>) that holds the geometries</li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="the Simple Feature standard">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+the Simple Feature standard
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>“Simple Feature Access” is an <a href="https://www.ogc.org/standard/sfa/">open standard</a> for data with vector geometries. It defines a set of classes for geometries and operations on them.</p>
+<ul>
+<li>“simple” refers to curves that are “simply” represented by points connected by straight lines</li>
+<li>connecting lines are not allowed to <a href="https://r-spatial.org/book/03-Geometries.html#sec-valid">self-intersect</a></li>
+<li>polygons can have holes, and have validity constraints: holes cannot extrude the outer ring etc.</li>
+<li>All spatial software uses this: ArcGIS, QGIS, PostGIS, other spatial databases, …</li>
+</ul>
+</div>
+</div>
+<section id="why-do-all-functions-in-sf-start-with-st_" class="level4">
+<h4 class="anchored" data-anchor-id="why-do-all-functions-in-sf-start-with-st_">Why do all functions in <code>sf</code> start with <code>st_</code>?</h4>
+<ul>
+<li>see <a href="https://ecoevo.social/@noamross/112055449473807578">here</a></li>
+</ul>
+</section>
+<section id="sf-operators-how-to-understand" class="level4">
+<h4 class="anchored" data-anchor-id="sf-operators-how-to-understand"><code>sf</code> operators, how to understand?</h4>
+<p>Package <code>sf</code> has objects at three nested <a href="https://r-spatial.org/book/07-Introsf.html#fig-sfobj">“levels”</a>:</p>
+<ul>
+<li><p><code>sfg</code>: a single geometry (without coordinate reference system); contained in:</p></li>
+<li><p><code>sfc</code>: a set of <code>sfg</code> geometries (<code>list</code>), with a coordinate reference system and bounding box; contained in:</p></li>
+<li><p><code>sf</code>: a <code>data.frame</code> or <code>tibble</code> with at least one geometry (<code>sfc</code>) column</p></li>
+<li><p>Operations <em>not</em> involving geometry (<code>data.frame</code>; base R; tidyverse)</p>
+<ul>
+<li>geometry column + <code>sf</code> class is sticky!</li>
+<li>this can be convenient, and sometimes annoying</li>
+<li>use <code>as.data.frame</code> or <code>as_tibble</code> to strip the <code>sf</code> class label</li>
+</ul></li>
+<li><p>Operations involving <em>only</em> geometry</p>
+<ul>
+<li><strong>predicates</strong> (resulting <code>TRUE</code>/<code>FALSE</code>)
+<ul>
+<li>unary</li>
+<li>binary: <a href="https://en.wikipedia.org/wiki/DE-9IM">DE9-IM</a>; work on two sets, result <code>sgbp</code>, which is a sparse logical matrix representation
+<ul>
+<li>is_within_distance</li>
+</ul></li>
+</ul></li>
+<li><strong>measures</strong>
+<ul>
+<li>unary: length, area</li>
+<li>binary: distance, <code>by_element = FALSE</code></li>
+</ul></li>
+<li><strong>transformers</strong>
+<ul>
+<li>unary: buffer, centroid</li>
+<li>binary: intersection, union, difference, symdifference</li>
+<li>n-ary: intersection, difference</li>
+</ul></li>
+</ul></li>
+<li><p>Operations involving geometry <em>and</em> attributes</p>
+<ul>
+<li>many of the above!</li>
+<li><code>st_join</code></li>
+<li><code>aggregate</code></li>
+<li><code>st_interpolate_aw</code>: requires expression whether variable is spatially <em>extensive</em> or <em>intensive</em></li>
+</ul></li>
+</ul>
+</section>
 </section>
 <section id="raster-data" class="level3">
 <h3 class="anchored" data-anchor-id="raster-data">Raster data</h3>
+<p>In addition to vector (point/line/polygon) data, we also have <em>raster data</em>. For <em>regular</em> rasters, space is cut into square cells, aligned with <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>. Raster spaces <em>can</em> tesselate, see <a href="https://r-spatial.org/book/03-Geometries.html#raster-tessellations">here</a>.</p>
+<p>In addition to regular rasters, we have rotated, sheared, rectilinear and curvilinear rasters. The raster <em>space</em> is primarily flat, so any time we use it model data of the Earth surface, we violate the constant raster cell size concept. Many data are distributed as regular rasters in geodetic coordinates (long/lat space, e.g., 0.25 degree raster cells), mostly for convienience (of who?)</p>
+<p><strong>Discrete global grids</strong> are (semi-)regular tesselations of the Earth surface, using squares, triangles, or hexagons. Examples are:</p>
+<ul>
+<li>Google’s <a href="http://s2geometry.io/">s2geometry</a> (R package <a href="https://cran.r-project.org/web/packages/s2/index.html">s2</a>)</li>
+<li>Uber’s <a href="https://www.uber.com/en-FR/blog/h3/">H3</a> (R package <a href="https://cran.r-project.org/web/packages/h3r/index.html">h3r</a>)</li>
+<li>Kevin Sahr’s <a href="https://discreteglobal.wpengine.com/">dggrid</a> (also nested hexagons; R package <a href="https://cran.r-project.org/web/packages/dggridR/index.html">dggridr</a>)</li>
+</ul>
+<p>Interestingly, computer screens are raster devices, so any time we do view vector data on a computer screen, a rasterization has taken place.</p>
+<section id="data-cubes" class="level4">
+<h4 class="anchored" data-anchor-id="data-cubes">data cubes</h4>
+<p>Data cubes are <em>array data</em> with one or more dimensions associated with space or geometry. The degenerate example is a one-dimensional array (or collection thereof), which we have in a table or data.frame. The canonical example of array data is raster data, or a time series thereof.</p>
+<p>Further examples include:</p>
+<ul>
+<li>3D rasters, including depth/height (atmospheric, geological)</li>
+<li>time series for points (one dimension with feature geometries)</li>
+<li>time series for areas (one dimension with feature geometries)</li>
+<li>Origin-destination (OD) matrices (two dimensions with feature geometries)</li>
+<li>OD matrices as a function of time</li>
+</ul>
+</section>
+<section id="cdl" class="level4">
+<h4 class="anchored" data-anchor-id="cdl">CDL</h4>
+<p>CDL stands for <a href="https://docs.unidata.ucar.edu/nug/2.0-draft/cdl.html">common data language</a> and is the human-readable, text-form of the binary NetCDF format. NetCDF is the dominant format used for geospatial modelling data, like weather reanalysis (ERA5) and climate forecast (CMIP6) data. It defines</p>
+<ul>
+<li>dimensions: defines names and integer range (dimension)</li>
+<li>variables: specifies how arrays depend on dimensions</li>
+<li>data: the actual values of the arrays</li>
+</ul>
+<p>Beyond NetCDF, Zarr is now also used as a cloud-optimized format (see below) following CDL conventions.</p>
+</section>
+<section id="cf-conventions" class="level4">
+<h4 class="anchored" data-anchor-id="cf-conventions">CF conventions</h4>
+<p>The <a href="http://cfconventions.org/">CF metadata conventions</a> contain conventions for CF (climate and forecast) data, including how variables are named and defined, how units are expressed, and also how e.g.&nbsp;vector data cubes can be realised with CDL (search for “discrete geometries”).</p>
+</section>
 </section>
 <section id="time-series" class="level3">
 <h3 class="anchored" data-anchor-id="time-series">Time series</h3>
-<p>Typical data structure: table (e.g., a .csv) with a Date or DateTime column.</p>
+<p>Typical data structure: table (e.g., a .csv, or <code>data.frame</code>) with a Date or DateTime column, or a matrix (pkg <code>zoo</code> and <code>xts</code>) with a Date or DateTime or index (attribute).</p>
 <ul>
 <li>Does time refer to a time instance, or to a time period?</li>
 <li>Is the time period clear, and/or explicit (start- and end-time)?</li>
-<li>Are time stamps of a time “type”, or in case of text, do time stamps follow a known schema such as <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO8601</a>?</li>
+<li>Common assumption:
+<ul>
+<li>left-closed, right-open interval;</li>
+<li>time stamp indicates the start</li>
+<li>useful if time step is constant (regular)</li>
+</ul></li>
+<li>Are time stamps of a time “type” (<code>Date</code>, <code>POSIXt</code>), or in case of text, do time stamps follow a known schema such as <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO8601</a>?</li>
 </ul>
-</section>
-<section id="data-cubes" class="level3">
-<h3 class="anchored" data-anchor-id="data-cubes">Data cubes</h3>
 </section>
 <section id="cloud-optimized-geospatial-apis" class="level3">
 <h3 class="anchored" data-anchor-id="cloud-optimized-geospatial-apis">Cloud-optimized geospatial, APIs</h3>
+<p>Cloud-optimized or cloud-native datasets are</p>
+<ul>
+<li>For vector data: paruet, geoparquet, arrow</li>
+<li>For raster data: cloud-optimized GeoTIFF (COG),</li>
+<li>Raster data/data cubes: Zarr (typically follows CDL)</li>
+</ul>
+<section id="apis" class="level4">
+<h4 class="anchored" data-anchor-id="apis">APIs</h4>
+<p>APIs are application programming interfaces; essentially, they define the way the web works. Without going too much in detail how they work, we can point to several api’s:</p>
+<ul>
+<li><a href="https://stacspec.org/en">STAC</a>, the spatiotemporal asset catalog, is a spec for APIs that can tell you where to find datasets, allowing for temporal and special predicates</li>
+<li><a href="https://stacindex.org/">stacindex</a> gives an index to public STACs</li>
+<li><a href="https://openeo.org/">openEO</a> an API to query and process data cubes (satellite imagery in particular), e.g.&nbsp;run on the <a href="https://dataspace.copernicus.eu/">CDSE</a>; clients are available for R, Python, Julia as well as JavaScript (web-based, graphical)</li>
+<li><a href="https://cds.climate.copernicus.eu/">CDS</a> the climate data store allows you to download weather or climate data, potentially after processing (e.g.&nbsp;aggregating to weekly/monthly mean or maximum values, or selecting a specific time period)</li>
+</ul>
 </section>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Roger Bivand, 2024; Introduction to the North Carolina SIDS data set (re-revised); <a href="https://cran.r-project.org/web/packages/spdep/vignettes/sids.html">spdep vignette</a></li>
+<li>Haslett, J. and Raftery, A. E. (1989). Space-time Modelling with Long-memory Dependence: Assessing Ireland’s Wind Power Resource (with Discussion). Applied Statistics 38, 1-50.</li>
+<li>Pebesma, E., 2012. spacetime: Spatio-Temporal Data in R. Journal of Statistical Software, volume 51, issue 7; <a href="https://www.jstatsoft.org/article/view/v051i07">1-30</a></li>
+<li>Pebesma, E.; Bivand, R. (2023). Spatial Data Science: With Applications in R (1st ed.). 314 pages. <a href="https://doi.org/10.1201/9780429459016">Chapman and Hall/CRC, Boca Raton.</a>; available <a href="https://r-spatial.org/book/">online</a></li>
+</ul>
 </section>
 
 </main>
