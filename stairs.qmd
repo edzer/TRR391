@@ -25,7 +25,7 @@ for retrieving satellite, weather and climate data.
 * this will be mostly a lecture, confronting you with ideas and content
 * hands-on experience
 * where to go with questions? Friends, colleagues, supervisors, GitHub, StackOverflow, ...
-* a possible resource (with exercises, answers online): [Spatial Data Science](https://r-spatial.org/book/)
+* a possible resource is [Spatial Data Science: with applications in R](https://r-spatial.org/book/) (contains exercises, with answers [online](https://edzer.github.io/sdsr_exercises/))
 
 ## What is FAIR?
 
