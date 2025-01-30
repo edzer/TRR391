@@ -27,9 +27,20 @@ for retrieving satellite, weather and climate data.
 * where to go with questions? Friends, colleagues, supervisors, GitHub, StackOverflow, ...
 * a possible resource (with exercises, answers online): [Spatial Data Science](https://r-spatial.org/book/)
 
+## What is FAIR?
+
+* findability, accessibility, interoperability, and reusability
+* F, A have to do with _where_ you put your data
+* I, R have to do with _how_ you put it there, in which form(at)
+
+The degree of reusability depends on
+
+* whether data can be reused _at all_, and
+* how easy it is going to be to reuse the data
+
 ### R-markdown
 
-This html document was generated with 
+For reasons of reusability, this html document was generated with 
 ```
 quarto render stairs.qmd
 ```

@@ -151,9 +151,22 @@ window.Quarto = {
 <li>where to go with questions? Friends, colleagues, supervisors, GitHub, StackOverflow, …</li>
 <li>a possible resource (with exercises, answers online): <a href="https://r-spatial.org/book/">Spatial Data Science</a></li>
 </ul>
+</section>
+<section id="what-is-fair" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-fair">What is FAIR?</h2>
+<ul>
+<li>findability, accessibility, interoperability, and reusability</li>
+<li>F, A have to do with <em>where</em> you put your data</li>
+<li>I, R have to do with <em>how</em> you put it there, in which form(at)</li>
+</ul>
+<p>The degree of reusability depends on</p>
+<ul>
+<li>whether data can be reused <em>at all</em>, and</li>
+<li>how easy it is going to be to reuse the data</li>
+</ul>
 <section id="r-markdown" class="level3">
 <h3 class="anchored" data-anchor-id="r-markdown">R-markdown</h3>
-<p>This html document was generated with</p>
+<p>For reasons of reusability, this html document was generated with</p>
 <pre><code>quarto render stairs.qmd</code></pre>
 <p>with sources on <a href="https://github.com/edzer/TRR391/">GitHub</a>. Feel free to</p>
 <ul>
@@ -279,14 +292,14 @@ window.Quarto = {
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>st <span class="ot">=</span> <span class="fu">Sys.time</span>() <span class="co"># current time</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(st) <span class="co"># floating point: has milli/micro seconds</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1737812581</code></pre>
+<pre><code>[1] 1738224244</code></pre>
 </div>
 </div>
 <p>and support for time differences:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>st <span class="sc">-</span> dt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Time difference of 274.7972 days</code></pre>
+<pre><code>Time difference of 279.5619 days</code></pre>
 </div>
 </div>
 </section>
